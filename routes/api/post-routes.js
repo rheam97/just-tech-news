@@ -1,13 +1,14 @@
 const router = require('express').Router()
 const { includes } = require('lodash')
 const { inc } = require('semver')
-const {Post, User} = require('../../models')
+const {Post, User, Vote} = require('../../models')
+const sequelize = require('../../config/connection')
 
 router.get('/', (req, res)=> {
     console.log('=================')
 
     Post.findAll({
-        attributes: ['id', 'post_url', 'title', 'created_at'],
+        attributes: ['id', 'post_url', 'title', 'created_at', [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']],
         order: [['created_at', "DESC"]],
         include: [
             {
@@ -29,7 +30,7 @@ router.get('/:id', (req, res)=> {
         where:{
             id: req.params.id
         },
-        attributes: ['id', 'post_url', 'title', 'created_at'],
+        attributes: ['id', 'post_url', 'title', 'created_at', [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']],
         include: [{
             model: User,
             attributes: ['username']
@@ -51,14 +52,38 @@ router.post('/', (req, res)=> {
         title: req.body.title,
         post_url: req.body.post_url,
         user_id: req.body.user_id
-    }).then(dbPostData=> {
-       res.json(dbPostData)
+    }).then(()=> {
+       return Post.findOne({
+           where: {
+               id: req.body.post_id
+           },
+           attributes: [
+            'id',
+            'post_url',
+            'title',
+            'created_at',
+            [
+                sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
+                'vote_count'
+              ]
+           ]
+       }).then(dbPostData=> {
+           res.json(dbPostData)
+       })
     }).catch(err=>{
         console.log(err)
         res.status(500).json(err)
     })
 })
 
+router.put('/upvote', (req, res)=> {
+   Post.upvote(req.body, {Vote}).then(dbPostData=> {
+        res.json(dbPostData)
+    }).catch(err=> {
+        console.log(err)
+        res.status(500).json(err)
+    })
+} )
 
 router.put('/:id', (req, res)=> {
     Post.update({
@@ -96,4 +121,7 @@ router.delete('/:id', (req, res)=> {
         res.status(500).json(err)
     })
 })
+
+
+
 module.exports = router
