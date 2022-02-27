@@ -57,6 +57,7 @@ router.post('/', withAuth, (req, res)=> {
         email: req.body.email,
         password: req.body.password
     }).then(dbUserData=> {
+        console.log(dbUserData)
         req.session.save(()=> {
             req.session.user_id= dbUserData.id;
             req.session.username = dbUserData.username;
@@ -72,7 +73,8 @@ router.post('/', withAuth, (req, res)=> {
 })
 
 router.post('/login', (req,res)=> {
-    console.log(req.session);
+    console.log('*')
+    console.log(req.body);
     User.findOne({
         where: {
             email: req.body.email
@@ -87,12 +89,13 @@ router.post('/login', (req,res)=> {
             res.status(400).json({message: 'Incorrect password.'})
             return
         }
-        req.session.save(()=> {
+        req.session.save(()=>{
             req.session.user_id= dbUserData.id;
             req.session.username = dbUserData.username;
             req.session.loggedIn = true;
 
             res.json({user: dbUserData, message: 'You are now logged in!'})
+            // res.render('dashboard')
         })
 })
 })

@@ -12,14 +12,15 @@ async function loginFormHandler(event){
           }),
           headers: {'Content-Type': 'application/json'}
       })
-      
+
  if(response.ok){
-     console.log('ok')
+    response.text().then(data => {
+       console.log(data)});
     document.location.replace('/dashboard')
       }else {
           alert(response.statusText)
-      }
-  }
+     }
+ }
 }
 
 async function signupFormHandler(event){
@@ -30,7 +31,7 @@ const username = document.querySelector('#username-signup').value.trim();
   const password = document.querySelector('#password-signup').value.trim();
 if(username && email && password){
     const response = await fetch('/api/users', {
-        method: 'Post',
+        method: 'POST',
         body: JSON.stringify({
             username, email, password
         }),
