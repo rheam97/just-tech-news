@@ -12,8 +12,10 @@ async function loginFormHandler(event){
           }),
           headers: {'Content-Type': 'application/json'}
       })
+      
  if(response.ok){
-    setTimeout(() => {document.location.replace('/dashboard/')}, 500)
+     console.log('ok')
+    document.location.replace('/dashboard')
       }else {
           alert(response.statusText)
       }
@@ -35,7 +37,7 @@ if(username && email && password){
         headers: {'Content-Type': 'application/json'}
     })
     if(response.ok) {
-        console.log('success')
+        document.location.replace('/dashboard/');
     }
     else {
         alert(response.statusText)

@@ -71,7 +71,8 @@ router.post('/', withAuth, (req, res)=> {
     })
 })
 
-router.post('/login', withAuth, (req,res)=> {
+router.post('/login', (req,res)=> {
+    console.log(req.session);
     User.findOne({
         where: {
             email: req.body.email
